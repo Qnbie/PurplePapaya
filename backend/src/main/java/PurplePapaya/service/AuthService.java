@@ -1,6 +1,7 @@
 package PurplePapaya.service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -42,7 +43,7 @@ public class AuthService {
         mailService.sendMail(new NotificationEmail("Please activate your account!", user.getEmail(), 
         "Köszi, hogy regisztráltál a PurplePapayaára:3"+ 
         "az accountod aktiválásához kattints ide: " + 
-        "http://localhost:8080/api/auth/accountverification/" + token));
+        "http://localhost:8080/api/auth/accountVerification/" + token));
     }
 
     private String generateVerificationToken(User user) {
@@ -52,5 +53,20 @@ public class AuthService {
         verificationToken.setToken(token);
         verificationTokenRepository.save(verificationToken); 
         return token;
+    }
+
+	public void verifyAccount(String token) throws PurplePapayaException {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new PurplePapayaException("Invalid Token"));
+        fetchUserEnable(verificationToken.get());
+    }
+
+
+    @Transactional
+    private void fetchUserEnable(VerificationToken verificationToken) throws PurplePapayaException {
+        String username = verificationToken.getUser().getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new PurplePapayaException("User not found with name " + username));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }
