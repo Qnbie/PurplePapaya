@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import PurplePapaya.model.VerificationToken;
 
 @Repository
-public interface VerificationRepository extends JpaRepository<VerificationToken, Long> {
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
     
 }

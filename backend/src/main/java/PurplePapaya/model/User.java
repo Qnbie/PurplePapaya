@@ -26,12 +26,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
     @NotBlank(message = "Commuity name is required.")
-    private String userName;
+    private String username;
     @NotBlank(message = "Password is required.")
     private String password;
     @Email
     @NotEmpty(message = "Email is requied")
-    private String eamil;
+    private String email;
     private Instant created;
     private boolean enabled;
 }
