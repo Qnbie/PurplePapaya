@@ -28,6 +28,7 @@ public class AuthService {
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws PurplePapayaException {
+        
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
@@ -40,8 +41,8 @@ public class AuthService {
         String token = generateVerificationToken(user);
         mailService.sendMail(new NotificationEmail("Please activate your account!", user.getEmail(), 
         "Köszi, hogy regisztráltál a PurplePapayaára:3"+ 
-        "az accountod aktiválásához kattints ide:" + 
-        "localhost:8080/api/auth/accountverification/" + token));
+        "az accountod aktiválásához kattints ide: " + 
+        "http://localhost:8080/api/auth/accountverification/" + token));
     }
 
     private String generateVerificationToken(User user) {

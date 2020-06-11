@@ -20,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity signup(@RequestBody RegisterRequest registerRequest) throws PurplePapayaException {
+    public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) throws PurplePapayaException {
         authService.signup(registerRequest);
         return new ResponseEntity<>("User Registrarion Succesful", HttpStatus.OK);
     }
