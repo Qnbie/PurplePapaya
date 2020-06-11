@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import PurplePapaya.dto.AuthenticationResponse;
+import PurplePapaya.dto.LoginRequest;
 import PurplePapaya.dto.RegisterRequest;
 import PurplePapaya.exeption.PurplePapayaException;
 import PurplePapaya.service.AuthService;
+import io.jsonwebtoken.security.InvalidKeyException;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -33,5 +36,11 @@ public class AuthController {
     public ResponseEntity<String> verifyAccount(@PathVariable String token) throws PurplePapayaException {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account Activated Successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest)
+            throws InvalidKeyException, PurplePapayaException {
+        return authService.login(loginRequest);
     }
 }
