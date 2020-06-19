@@ -1,5 +1,6 @@
 package PurplePapaya.controller;
 
+import javax.validation.Valid;
 import javax.websocket.server.PathParam;
 
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import PurplePapaya.dto.AuthenticationResponse;
 import PurplePapaya.dto.LoginRequest;
+import PurplePapaya.dto.RefreshTokenRequest;
 import PurplePapaya.dto.RegisterRequest;
 import PurplePapaya.exeption.PurplePapayaException;
 import PurplePapaya.service.AuthService;
+import PurplePapaya.service.RefreshTokenService;
 import io.jsonwebtoken.security.InvalidKeyException;
 import lombok.AllArgsConstructor;
 
@@ -25,6 +28,7 @@ import lombok.AllArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) throws PurplePapayaException {
@@ -42,5 +46,17 @@ public class AuthController {
     public AuthenticationResponse login(@RequestBody LoginRequest loginRequest)
             throws InvalidKeyException, PurplePapayaException {
         return authService.login(loginRequest);
+    }
+
+    @PostMapping("/refresh/token")
+    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest)
+            throws PurplePapayaException {
+        return authService.refreshToken(refreshTokenRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
+        return ResponseEntity.status(HttpStatus.OK).body("Refresh Token Deleted Successfully!!");
     }
 }
