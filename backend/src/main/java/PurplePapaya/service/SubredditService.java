@@ -9,6 +9,8 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import PurplePapaya.dto.SubredditDto;
+import PurplePapaya.exeption.PurplePapayaException;
+import PurplePapaya.mapper.SubredditMapper;
 import PurplePapaya.model.Subreddit;
 import PurplePapaya.repository.SubredditRepository;
 import lombok.AllArgsConstructor;
@@ -20,24 +22,23 @@ import lombok.extern.slf4j.Slf4j;
 public class SubredditService {
 
     private final SubredditRepository subredditRepository;
+    private final SubredditMapper subredditMapper;
 
     @Transactional
     public SubredditDto save(SubredditDto subredditDto) {
-        Subreddit save = subredditRepository.save(mapSubredditDto(subredditDto));
+        Subreddit save = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
         subredditDto.setId(save.getId());
         return subredditDto;
-    }
-
-    private Subreddit mapSubredditDto(SubredditDto subredditDto) {
-        return Subreddit.builder().name(subredditDto.getName()).description(subredditDto.getDescription()).build();
-    }
+    }   
 
     @Transactional
     public List<SubredditDto> getAllSubreddits() {
-        return subredditRepository.findAll().stream().map(this::mapToDto).collect(Collectors.toList());
+        return subredditRepository.findAll().stream().map(subredditMapper::mapSubredditToDto).collect(Collectors.toList());
     }
 
-    private SubredditDto mapToDto(Subreddit subreddit) {
-        return SubredditDto.builder().name(subreddit.getName()).id(subreddit.getId()).numberOfPost(subreddit.getPosts().size()).build();
-    }
+	public SubredditDto getSubreddit(Long id) throws PurplePapayaException {
+        Subreddit subreddit = subredditRepository.findById(id)
+                .orElseThrow(() -> new PurplePapayaException("No subreddit found with ID - " + id));
+        return subredditMapper.mapSubredditToDto(subreddit);
+        }
 }
