@@ -6,14 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import PurplePapaya.dto.PostRequest;
 import PurplePapaya.dto.PostResponse;
+import PurplePapaya.exeption.PurplePapayaException;
 import PurplePapaya.model.Post;
 import PurplePapaya.model.Subreddit;
 import PurplePapaya.model.User;
+import PurplePapaya.model.Vote;
+import PurplePapaya.model.VoteType;
 import PurplePapaya.repository.CommentRepository;
 import PurplePapaya.repository.VoteRepository;
 import PurplePapaya.service.AuthService;
 
 import java.util.Optional;
+
+import com.github.marlonlom.utilities.timeago.TimeAgo;
 
 import static PurplePapaya.model.VoteType.DOWNVOTE;
 import static PurplePapaya.model.VoteType.UPVOTE;
@@ -27,7 +32,6 @@ public abstract class PostMapper {
     private VoteRepository voteRepository;
     @Autowired
     private AuthService authService;
-
 
     @Mapping(target = "createdDate", expression = "java(java.time.Instant.now())")
     @Mapping(target = "description", source = "postRequest.description")
@@ -45,6 +49,31 @@ public abstract class PostMapper {
     @Mapping(target = "downVote", expression = "java(isPostDownVoted(post))")
     public abstract PostResponse mapToDto(Post post);
 
-    
+    Integer commentCount(Post post) {
+        return commentRepository.findByPost(post).size();
+    }
+
+    String getDuration(Post post) {
+        return TimeAgo.using(post.getCreatedDate().toEpochMilli());
+    }
+
+    boolean isPostUpVoted(Post post) throws PurplePapayaException {
+        return checkVoteType(post, UPVOTE);
+    }
+
+    boolean isPostDownVoted(Post post) throws PurplePapayaException {
+        return checkVoteType(post, DOWNVOTE);
+    }
+
+    private boolean checkVoteType(Post post, VoteType voteType) throws PurplePapayaException {
+        if (authService.isLoggedIn()) {
+            Optional<Vote> voteForPostByUser =
+                    voteRepository.findTopByPostAndUserOrderByVoteIdDesc(post,
+                            authService.getCurrentUser());
+            return voteForPostByUser.filter(vote -> vote.getVoteType().equals(voteType))
+                    .isPresent();
+        }
+        return false;
+    }
 
 }
